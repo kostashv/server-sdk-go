@@ -272,11 +272,15 @@ func (c *SignalClient) SendUpdateParticipantMetadata(metadata *livekit.UpdatePar
 func (c *SignalClient) readResponse() (*livekit.SignalResponse, error) {
 	conn := c.websocketConn()
 	if conn == nil {
+		logger.Debugw("conn == nil")
 		return nil, errors.New("cannot read response before join")
 	}
 	// handle special messages and pass on the rest
+	logger.Debugw("before read message")
 	messageType, payload, err := conn.ReadMessage()
+	logger.Debugw("after read message")
 	if err != nil {
+		logger.Debugw("read message err")
 		return nil, err
 	}
 
@@ -302,8 +306,11 @@ func (c *SignalClient) handleResponse(res *livekit.SignalResponse) {
 			c.OnAnswer(FromProtoSessionDescription(msg.Answer))
 		}
 	case *livekit.SignalResponse_Offer:
+		logger.Debugw("OFFER!!!!!")
 		if c.OnOffer != nil {
 			c.OnOffer(FromProtoSessionDescription(msg.Offer))
+		} else {
+			logger.Debugw("c.OnOffer is nil !!!!!")
 		}
 	case *livekit.SignalResponse_Trickle:
 		if c.OnTrickle != nil {
@@ -363,14 +370,19 @@ func (c *SignalClient) readWorker(readerClosedCh chan struct{}) {
 		c.pendingResponse = nil
 	}
 	for {
+		logger.Debugw("before read response")
 		res, err := c.readResponse()
+		logger.Debugw("after read response")
+		
 		if err != nil {
 			if !isIgnoredWebsocketError(err) {
 				logger.Infow("error while reading from signal client", "err", err)
 			}
 			return
 		}
+		logger.Debugw("before handle response")
 		c.handleResponse(res)
+		logger.Debugw("after handle response")
 	}
 }
 
