@@ -278,9 +278,9 @@ func (c *SignalClient) readResponse() (*livekit.SignalResponse, error) {
 	// handle special messages and pass on the rest
 	logger.Debugw("before read message")
 	messageType, payload, err := conn.ReadMessage()
-	logger.Debugw("after read message")
+	logger.Debugw("after read message", "err", err)
 	if err != nil {
-		logger.Debugw("read message err")
+		logger.Debugw("read message err", "err", err)
 		return nil, err
 	}
 
@@ -372,7 +372,7 @@ func (c *SignalClient) readWorker(readerClosedCh chan struct{}) {
 	for {
 		logger.Debugw("before read response")
 		res, err := c.readResponse()
-		logger.Debugw("after read response")
+		logger.Debugw("after read response", "err", err)
 		
 		if err != nil {
 			if !isIgnoredWebsocketError(err) {
